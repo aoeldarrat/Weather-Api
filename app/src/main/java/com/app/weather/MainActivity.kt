@@ -52,9 +52,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Load initial weather data
-        viewModel.getWeatherData(city = "London")
-
         setContent {
             WeatherTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -76,7 +73,6 @@ fun WeatherScreen(
     searchQuery: String,
     currentCity: String,
     onSearchQueryChange: (String) -> Unit,
-    onSearch: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -116,13 +112,6 @@ fun WeatherScreen(
                         singleLine = true,
                         enabled = !isLoading
                     )
-
-                    Button(
-                        onClick = onSearch,
-                        enabled = !isLoading && searchQuery.isNotBlank()
-                    ) {
-                        Text("Search")
-                    }
                 }
             }
         }
@@ -281,10 +270,6 @@ fun MainScreen(
                 currentCity = currentCity,
                 onSearchQueryChange = { query ->
                     viewModel.updateSearchQuery(query)
-                    viewModel.searchWeather()
-                },
-                onSearch = {
-                    viewModel.searchWeather()
                 },
                 onNavigateToSettings = {
                     navController.navigate(route = Settings)
