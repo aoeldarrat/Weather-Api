@@ -5,11 +5,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.weather.model.WeatherResponse
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 class WeatherViewModel(
     private val weatherService: WeatherService
 ) : ViewModel() {
@@ -28,6 +34,16 @@ class WeatherViewModel(
 
     private val _currentCity = MutableStateFlow("London")
     val currentCity: StateFlow<String> = _currentCity.asStateFlow()
+
+    init {
+        _searchQuery
+            .debounce(500L)
+            .filter { query ->
+                query.isNotBlank()
+            }.onEach {
+                getWeatherData(it.trim())
+            }.launchIn(viewModelScope)
+    }
 
     fun getWeatherData(city: String) {
         viewModelScope.launch {
