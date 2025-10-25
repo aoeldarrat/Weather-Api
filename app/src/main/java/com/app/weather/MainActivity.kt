@@ -281,6 +281,7 @@ fun MainScreen(
                 currentCity = currentCity,
                 onSearchQueryChange = { query ->
                     viewModel.updateSearchQuery(query)
+                    viewModel.searchWeather()
                 },
                 onSearch = {
                     viewModel.searchWeather()
