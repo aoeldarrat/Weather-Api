@@ -72,21 +72,6 @@ class WeatherViewModel(
         _searchQuery.value = query
     }
 
-    fun searchWeather() {
-        val query = _searchQuery.value.trim()
-        if (query.isNotEmpty()) {
-            getWeatherData(query)
-        }
-    }
-
-    fun clearError() {
-        _error.value = null
-    }
-
-    fun retry(city: String) {
-        getWeatherData(city)
-    }
-
     fun retryCurrentSearch() {
         getWeatherData(_currentCity.value)
     }
