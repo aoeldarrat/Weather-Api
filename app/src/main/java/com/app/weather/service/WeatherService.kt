@@ -1,3 +1,4 @@
+import com.app.weather.model.PointDataResponse
 import com.app.weather.model.WeatherResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -13,6 +14,12 @@ interface WeatherService {
     suspend fun getWeather(
         @Path("cityName") cityName: String
     ): WeatherResponse
+
+    @GET("points/{latitude},{longitude}")
+    suspend fun getPointData(
+        @Path("latitude") latitude: Double,
+        @Path("longitude") longitude: Double
+    ): PointDataResponse
 }
 
 object ApiConfig {
@@ -29,7 +36,7 @@ object ApiConfig {
 
         // Retrofit
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://goweather.xyz/")
+            .baseUrl("https://api.weather.gov/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
