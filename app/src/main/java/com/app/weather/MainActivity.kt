@@ -35,8 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.app.weather.model.WeatherResponse
-import com.app.weather.model.toFahrenheitSafe
+import com.app.weather.model.PointDataResponse
 import com.app.weather.navigation.Settings
 import com.app.weather.navigation.Weather
 import com.app.weather.ui.theme.WeatherTheme
@@ -67,12 +66,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WeatherScreen(
-    weather: WeatherResponse?,
+    pointData: PointDataResponse?,
     isLoading: Boolean,
     error: String?,
-    searchQuery: String,
-    currentCity: String,
-    onSearchQueryChange: (String) -> Unit,
+    searchLatitude: String,
+    searchLongitude: String,
+    onSearchQueryChange: (String?, String?) -> Unit,
     onNavigateToSettings: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -104,10 +103,24 @@ fun WeatherScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        label = { Text("City name") },
-                        placeholder = { Text("e.g., London, Tokyo") },
+                        value = searchLatitude,
+                        onValueChange = {
+                            onSearchQueryChange(it, null)
+                        },
+                        label = { Text("Latitude") },
+                        placeholder = { Text("e.g. -1.532548") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        enabled = !isLoading
+                    )
+
+                    OutlinedTextField(
+                        value = searchLongitude,
+                        onValueChange = {
+                            onSearchQueryChange(null, it)
+                        },
+                        label = { Text("longitude") },
+                        placeholder = { Text("e.g. -78.341774") },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         enabled = !isLoading
@@ -122,7 +135,7 @@ fun WeatherScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 CircularProgressIndicator()
                 Text(
-                    text = "Loading weather for $currentCity...",
+                    text = "Loading weather for $searchLatitude, $searchLongitude ...",
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
@@ -157,7 +170,7 @@ fun WeatherScreen(
                     }
                 }
             }
-            weather != null -> {
+            pointData != null -> {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -168,28 +181,28 @@ fun WeatherScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Weather in $currentCity",
+                            text = "Weather in $searchLatitude, $searchLongitude",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
                         Text(
-                            text = "Temperature: ${weather.temperature.toFahrenheitSafe()}",
+                            text = "Fire weather zone url: ${pointData.properties.fireWeatherZone}",
                             fontSize = 18.sp,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-
-                        Text(
-                            text = "Description: ${weather.description}",
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = "Wind: ${weather.wind}",
-                            fontSize = 16.sp
-                        )
+//
+//                        Text(
+//                            text = "Description: ${weather.description}",
+//                            fontSize = 16.sp,
+//                            modifier = Modifier.padding(bottom = 8.dp)
+//                        )
+//
+//                        Text(
+//                            text = "Wind: ${weather.wind}",
+//                            fontSize = 16.sp
+//                        )
                     }
                 }
             }
@@ -250,11 +263,11 @@ fun MainScreen(
     viewModel: WeatherViewModel
 ) {
     val navController = rememberNavController()
-    val weatherData by viewModel.weatherData.collectAsState()
+    val pointData by viewModel.pointData.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val currentCity by viewModel.currentCity.collectAsState()
+    val latitudeSearchQuery by viewModel.latitudeSearchQuery.collectAsState()
+    val longitudeSearchQuery by viewModel.longitudeSearchQuery.collectAsState()
 
     NavHost(
         modifier = modifier,
@@ -263,13 +276,13 @@ fun MainScreen(
     ) {
         composable<Weather> {
             WeatherScreen(
-                weather = weatherData,
+                pointData = pointData,
                 isLoading = isLoading,
                 error = error,
-                searchQuery = searchQuery,
-                currentCity = currentCity,
-                onSearchQueryChange = { query ->
-                    viewModel.updateSearchQuery(query)
+                searchLatitude = latitudeSearchQuery,
+                searchLongitude = longitudeSearchQuery,
+                onSearchQueryChange = { lat, long ->
+                    viewModel.updateSearchQuery(lat, long)
                 },
                 onNavigateToSettings = {
                     navController.navigate(route = Settings)
