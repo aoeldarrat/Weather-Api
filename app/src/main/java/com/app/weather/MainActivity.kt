@@ -188,7 +188,7 @@ fun WeatherScreen(
                         )
 
                         Text(
-                            text = "Fire weather zone url: ${pointData.properties.fireWeatherZone}",
+                            text = "Fire weather zone url: ${pointData.properties.timeZone}",
                             fontSize = 18.sp,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
