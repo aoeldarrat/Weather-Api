@@ -40,8 +40,8 @@ class WeatherViewModel(
     private val _longitudeSearchQuery = MutableStateFlow("")
     val longitudeSearchQuery: StateFlow<String> = _longitudeSearchQuery.asStateFlow()
 
-    private val _currentLatitude = MutableStateFlow(38.934770)
-    private val _currentLongitude = MutableStateFlow(-92.398969)
+    private val _currentLatitude = MutableStateFlow(-3.126801)
+    private val _currentLongitude = MutableStateFlow(22.629982)
     val currentLatitude: StateFlow<Double> = _currentLatitude.asStateFlow()
     val currentLongitude: StateFlow<Double> = _currentLongitude.asStateFlow()
 
