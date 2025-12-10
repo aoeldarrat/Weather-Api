@@ -30,21 +30,21 @@ data class Properties(
     @field:SerializedName("@id")
     val id: String,
     @field:SerializedName("@type")
-    val type: String,
+    val type: String?,
     @field:SerializedName("cwa")
-    val cwa: String,
+    val cwa: String?,
     @field:SerializedName("forcastOffice")
-    val forecastOffice: String,
+    val forecastOffice: String?,
     @field:SerializedName("gridId")
-    val gridId: String,
+    val gridId: String?,
     @field:SerializedName("gridX")
-    val gridX: String,
+    val gridX: String?,
     @field:SerializedName("gridY")
-    val gridY: String,
+    val gridY: String?,
     @field:SerializedName("forecastGridData")
-    val forecastGridData: String, // Url to the grid data
+    val forecastGridData: String?, // Url to the grid data
     @field:SerializedName("observationStations")
-    val observationStations: String, // Url to observation station
+    val observationStations: String?, // Url to observation station
 
 //comment out relative location - don't need it right now
 //    @field:SerializedName("relativeLocation")
@@ -52,17 +52,17 @@ data class Properties(
 
     /* These are all urls to fetch the data */
     @field:SerializedName("forecastZone")
-    val forecastZone: String,
+    val forecastZone: String?,
     @field:SerializedName("county")
-    val county: String,
+    val county: String?,
     @field:SerializedName("fireWeatherZone")
-    val fireWeatherZone: String,
+    val fireWeatherZone: String?,
 
     @field:SerializedName("timeZone")
-    val timeZone: String,
+    val timeZone: String?,
 
     @field:SerializedName("radarStation")
-    val radarStation: String,
+    val radarStation: String?,
 )
 
 data class RelativeLocation(
