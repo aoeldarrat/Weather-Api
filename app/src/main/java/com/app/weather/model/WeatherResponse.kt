@@ -22,7 +22,7 @@ data class PointDataResponse(
     @field:SerializedName("geometry")
     val geometry: Geometry,
 
-    @field:SerializedName("properies")
+    @field:SerializedName("properties")
     val properties: Properties
 )
 
