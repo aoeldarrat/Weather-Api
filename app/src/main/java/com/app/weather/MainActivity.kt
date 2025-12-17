@@ -1,11 +1,16 @@
 package com.app.weather
 
 import ApiConfig
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,9 +53,68 @@ class MainActivity : ComponentActivity() {
         WeatherViewModelFactory(weatherService)
     }
 
+    //TODO make a toast manager and display a toast when failing to get location
+//    private val alertManager: Toast
+
+    private val LOCATION_PERMISSION_KEY = Manifest.permission.ACCESS_FINE_LOCATION
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        if (it) {
+            setUserLocationData()
+        } else {
+            // Handle permission denied
+        }
+    }
+
+    private val locationListener = LocationListener {
+        location -> viewModel.setLatitudeLongitude(location.latitude, location.longitude)
+    }
+
+    /**
+     * Gets the user location. This step only executes if the user granted permission
+     */
+    fun setUserLocationData() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+            return
+        }
+
+        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+
+        try {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                5000L,
+                10f,
+                locationListener,
+            )
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun checkLocationPermissionAndSetLocation() {
+        when {
+            // Permission is already granted so just grab the
+            ContextCompat.checkSelfPermission(this, LOCATION_PERMISSION_KEY) == PackageManager.PERMISSION_GRANTED -> {
+                setUserLocationData()
+            }
+
+            // Show rationale if needed
+            shouldShowRequestPermissionRationale(LOCATION_PERMISSION_KEY) -> {
+                "Location permissions are needed to get the weather. This wont work otherwise"
+                requestPermissionLauncher.launch(LOCATION_PERMISSION_KEY)
+            }
+            else -> {
+                requestPermissionLauncher.launch(LOCATION_PERMISSION_KEY)
+            }
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        checkLocationPermissionAndSetLocation()
 
         setContent {
             WeatherTheme {
@@ -72,6 +137,7 @@ fun WeatherScreen(
     searchLatitude: String,
     searchLongitude: String,
     onSearchQueryChange: (String?, String?) -> Unit,
+    onSearchMade: (String, String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -125,6 +191,15 @@ fun WeatherScreen(
                         singleLine = true,
                         enabled = !isLoading
                     )
+
+                    Button(
+                        modifier = Modifier.padding(10.dp),
+                        onClick = {
+                            onSearchMade(searchLatitude, searchLongitude)
+                        }
+                    ) {
+                        Text(text = "Search")
+                    }
                 }
             }
         }
@@ -192,17 +267,6 @@ fun WeatherScreen(
                             fontSize = 18.sp,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-//
-//                        Text(
-//                            text = "Description: ${weather.description}",
-//                            fontSize = 16.sp,
-//                            modifier = Modifier.padding(bottom = 8.dp)
-//                        )
-//
-//                        Text(
-//                            text = "Wind: ${weather.wind}",
-//                            fontSize = 16.sp
-//                        )
                     }
                 }
             }
@@ -225,7 +289,7 @@ fun WeatherScreen(
             onClick = onNavigateToSettings,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Go to Settings")
+            Text("Go to Settings page")
         }
     }
 }
@@ -283,6 +347,9 @@ fun MainScreen(
                 searchLongitude = longitudeSearchQuery,
                 onSearchQueryChange = { lat, long ->
                     viewModel.updateSearchQuery(lat, long)
+                },
+                onSearchMade = { lat, long ->
+                    viewModel.getWeatherData(lat.toDouble(), long.toDouble())
                 },
                 onNavigateToSettings = {
                     navController.navigate(route = Settings)
