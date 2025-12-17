@@ -5,6 +5,10 @@ plugins {
 
     val kotlinVersion = "2.0.21"
     id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
+    // Make sure that you have the Google services Gradle plugin
+    id("com.google.gms.google-services")
+    // Add the Performance Monitoring Gradle plugin
+    id("com.google.firebase.firebase-perf")
 }
 android {
     namespace = "com.app.weather"
@@ -27,6 +31,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -62,7 +67,18 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.navigation.compose)
 
-    val nav_version = "2.9.0"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
+    // Add the dependency for the Performance Monitoring library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-perf")
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 }
