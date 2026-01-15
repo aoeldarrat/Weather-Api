@@ -41,7 +41,10 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.app.weather.model.PointDataResponse
+import com.app.weather.model.StationFeature
 import com.app.weather.navigation.Settings
 import com.app.weather.navigation.Weather
 import com.app.weather.ui.theme.WeatherTheme
@@ -132,6 +135,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WeatherScreen(
     pointData: PointDataResponse?,
+    stationData: LazyPagingItems<StationFeature>,
     isLoading: Boolean,
     error: String?,
     searchLatitude: String,
@@ -199,6 +203,10 @@ fun WeatherScreen(
                         }
                     ) {
                         Text(text = "Search")
+                    }
+
+                    for(data in stationData.itemSnapshotList.items) {
+                        Text(text = data.properties.name)
                     }
                 }
             }
@@ -333,6 +341,9 @@ fun MainScreen(
     val latitudeSearchQuery by viewModel.latitudeSearchQuery.collectAsState()
     val longitudeSearchQuery by viewModel.longitudeSearchQuery.collectAsState()
 
+    val stationData = viewModel.stationPagedData.collectAsLazyPagingItems()
+
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -341,6 +352,7 @@ fun MainScreen(
         composable<Weather> {
             WeatherScreen(
                 pointData = pointData,
+                stationData = stationData,
                 isLoading = isLoading,
                 error = error,
                 searchLatitude = latitudeSearchQuery,
