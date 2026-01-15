@@ -23,10 +23,10 @@ data class PointDataResponse(
     val geometry: Geometry,
 
     @field:SerializedName("properties")
-    val properties: Properties
+    val properties: PointDataProperties
 )
 
-data class Properties(
+data class PointDataProperties(
     @field:SerializedName("@id")
     val id: String,
     @field:SerializedName("@type")
