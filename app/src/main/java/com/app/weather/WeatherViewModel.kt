@@ -5,25 +5,26 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.weather.model.PointDataResponse
-import com.app.weather.model.WeatherResponse
+import com.app.weather.service.StationRepositoryImpl
+import com.app.weather.service.StationUseCase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class)
 class WeatherViewModel(
-    private val weatherService: WeatherService
+    private val weatherService: WeatherService,
 ) : ViewModel() {
 
     // Deprecated api logic
 //    private val _weatherData = MutableStateFlow<WeatherResponse?>(null)
 //    val weatherData: StateFlow<WeatherResponse?> = _weatherData.asStateFlow()
+
+    val repository = StationRepositoryImpl(weatherService)
+    val useCase = StationUseCase(repository)
+    val stationPagedData = useCase.fetchPagedStations()
 
     private val _pointData = MutableStateFlow<PointDataResponse?>(null)
     val pointData: StateFlow<PointDataResponse?> = _pointData.asStateFlow()
@@ -40,37 +41,39 @@ class WeatherViewModel(
     private val _longitudeSearchQuery = MutableStateFlow("")
     val longitudeSearchQuery: StateFlow<String> = _longitudeSearchQuery.asStateFlow()
 
-    private val _currentLatitude = MutableStateFlow(-3.126801)
-    private val _currentLongitude = MutableStateFlow(22.629982)
+    private val _currentLatitude = MutableStateFlow(39.105148)
+    private val _currentLongitude = MutableStateFlow(-94.584091)
     val currentLatitude: StateFlow<Double> = _currentLatitude.asStateFlow()
     val currentLongitude: StateFlow<Double> = _currentLongitude.asStateFlow()
 
     init {
-        _latitudeSearchQuery
-            .debounce(500L)
-            .filter { query ->
-                query.isNotBlank()
-            }.onEach {
-                if (!it.isEmpty() && !longitudeSearchQuery.value.isEmpty()) {
-                    getWeatherData(
-                        it.trim().toDouble(),
-                        longitudeSearchQuery.value.trim().toDouble()
-                    )
-                }
-            }.launchIn(viewModelScope)
 
-        _longitudeSearchQuery
-            .debounce(500L)
-            .filter { query ->
-                query.isNotBlank()
-            }.onEach {
-                if (!it.isEmpty() && !latitudeSearchQuery.value.isEmpty()) {
-                    getWeatherData(
-                        latitudeSearchQuery.value.trim().toDouble(),
-                        it.trim().toDouble()
-                    )
-                }
-            }.launchIn(viewModelScope)
+        // Dont need debounce on search for legit locations
+//        _latitudeSearchQuery
+//            .debounce(500L)
+//            .filter { query ->
+//                query.isNotBlank()
+//            }.onEach {
+//                if (!it.isEmpty() && !longitudeSearchQuery.value.isEmpty()) {
+//                    getWeatherData(
+//                        it.trim().toDouble(),
+//                        longitudeSearchQuery.value.trim().toDouble()
+//                    )
+//                }
+//            }.launchIn(viewModelScope)
+
+//        _longitudeSearchQuery
+//            .debounce(500L)
+//            .filter { query ->
+//                query.isNotBlank()
+//            }.onEach {
+//                if (!it.isEmpty() && !latitudeSearchQuery.value.isEmpty()) {
+//                    getWeatherData(
+//                        latitudeSearchQuery.value.trim().toDouble(),
+//                        it.trim().toDouble()
+//                    )
+//                }
+//            }.launchIn(viewModelScope)
     }
 
     fun getWeatherData(latitude: Double, longitude: Double) {
@@ -112,5 +115,12 @@ class WeatherViewModel(
 
     fun retryCurrentSearch() {
         getWeatherData(currentLatitude.value, currentLongitude.value)
+    }
+
+    fun setLatitudeLongitude(lat: Double, long: Double) {
+        _currentLatitude.value = lat
+        _currentLongitude.value = long
+
+        retryCurrentSearch()
     }
 }
