@@ -69,6 +69,9 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.paging.runtime.ktx)
+
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
 
