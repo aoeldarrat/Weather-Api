@@ -11,7 +11,7 @@ class StationUseCase(
         return stationRepository.getStations(
             pageSize = 10,
             initialLoadSize = 10,
-            maxCacheSize = 20
+            maxCacheSize = 500
         )
     }
 }

@@ -8,3 +8,6 @@ data class Weather(val state: String)
 @Serializable
 object Settings
 
+@Serializable
+object MapPage
+
