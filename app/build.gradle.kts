@@ -1,14 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+//    alias(libs.plugins.kotlin)
 
-    val kotlinVersion = "2.0.21"
-    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
     // Make sure that you have the Google services Gradle plugin
     id("com.google.gms.google-services")
     // Add the Performance Monitoring Gradle plugin
     id("com.google.firebase.firebase-perf")
+
+    // Hilt dependency injection
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 android {
     namespace = "com.app.weather"
@@ -38,15 +40,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
+// Dependency injection - Hilt
+    implementation(libs.hilt.dagger)
+    ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
