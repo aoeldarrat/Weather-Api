@@ -6,6 +6,6 @@ import androidx.compose.runtime.Composable
 @Composable
 fun MapScreen() {
     Column {
-        // TODO add map api
+
     }
 }
