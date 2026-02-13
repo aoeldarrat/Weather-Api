@@ -25,12 +25,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.room.Room
+import com.app.weather.model.AppDatabase
+import com.app.weather.navigation.Home
 import com.app.weather.navigation.MapPage
 import com.app.weather.navigation.Settings
 import com.app.weather.navigation.Weather
 import com.app.weather.ui.theme.WeatherTheme
 import com.app.weather.viewmodels.WeatherViewModel
 import com.app.weather.viewmodels.WeatherViewModelFactory
+import com.app.weather.views.HomeScreen
+import com.app.weather.views.HomeScreenProps
+import com.app.weather.views.MapScreen
 import com.app.weather.views.SettingsScreen
 import com.app.weather.views.WeatherScreen
 
@@ -98,19 +104,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         checkLocationPermissionAndSetLocation()
 
+        val roomDatabase = Room.databaseBuilder(
+            context = applicationContext,
+            klass = AppDatabase::class.java,
+            name = "database-name"
+        ).build()
+
+        val allUsers = roomDatabase.userDao().getAll()
+        val oneUser = roomDatabase.userDao().getUser("user_id")
+
+
         setContent {
             WeatherTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
                         modifier = Modifier.padding(innerPadding),
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        database = roomDatabase
                     )
                 }
             }
@@ -121,7 +137,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: WeatherViewModel
+    viewModel: WeatherViewModel,
+    database: AppDatabase
 ) {
     val navController = rememberNavController()
     val pointData by viewModel.pointData.collectAsState()
@@ -138,6 +155,16 @@ fun MainScreen(
         navController = navController,
         startDestination = Weather(state = "Good")
     ) {
+        composable<Home> {
+            HomeScreen(
+                // Mock data for now
+                props = HomeScreenProps(
+                    userLocation = "New York",
+                    temperature = 72.0,
+                    alerts = listOf("Alert1", "Alert1", "Alert1", "Alert1", "Alert1")
+                )
+            )
+        }
         composable<Weather> {
             WeatherScreen(
                 pointData = pointData,
@@ -170,7 +197,7 @@ fun MainScreen(
         }
 
         composable<MapPage>{
-
+            MapScreen()
         }
     }
 }
