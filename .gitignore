@@ -28,3 +28,5 @@ replay_pid*
 *.bin
 *.lock
 *.idea
+/.gradle/9.1.0/gc.properties
+/build/reports/problems/problems-report.html
