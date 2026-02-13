@@ -209,7 +209,12 @@ fun MainScreenPreview() {
     WeatherTheme {
         MainScreen(
             modifier = Modifier,
-            viewModel = WeatherViewModel(ApiConfig.getApiService())
+            viewModel = WeatherViewModel(ApiConfig.getApiService()),
+            database = Room.databaseBuilder(
+                context = MainActivity().applicationContext,
+                klass = AppDatabase::class.java,
+                name = "database-name"
+            ).build()
         )
     }
 }
