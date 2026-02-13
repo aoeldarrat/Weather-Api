@@ -46,9 +46,13 @@ android {
 }
 
 dependencies {
-// Dependency injection - Hilt
+    // Dependency injection - Hilt
     implementation(libs.hilt.dagger)
     ksp(libs.hilt.compiler)
+
+    // Room dependency
+    implementation(libs.room)
+    ksp(libs.room.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
